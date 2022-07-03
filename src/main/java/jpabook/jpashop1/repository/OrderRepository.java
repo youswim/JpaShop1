@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
 
 import javax.persistence.EntityManager;
+import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.*;
 import java.util.ArrayList;
@@ -28,13 +29,37 @@ public class OrderRepository {
     }
 
     public List<Order> findAll(OrderSearch orderSearch) {
-        return em.createQuery("select o from Order o join o.member m" +
-                        " where o.status = :status" +
-                        " and m.name like : name", Order.class)
-                .setParameter("status", orderSearch.getOrderStatus())
-                .setParameter("name", orderSearch.getMemberName())
-                .setMaxResults(1000)
-                .getResultList();
+
+        String select = "select o from Order o join o.member m";
+
+        TypedQuery<Order> query = null;
+
+        if ((orderSearch.getMemberName() == null || orderSearch.getMemberName().equals("")) && orderSearch.getOrderStatus() == null) {
+            System.out.println("둘다 없음");
+            query = em.createQuery("select o from Order o join o.member m", Order.class);
+
+        } else if (orderSearch.getMemberName() == null || orderSearch.getMemberName().equals("")){
+            System.out.println("이름 없음");
+            query = em.createQuery("select o from Order o join o.member m" +
+                            " where o.status = :status", Order.class)
+                    .setParameter("status", orderSearch.getOrderStatus());
+
+        } else if (orderSearch.getOrderStatus() == null) {
+            System.out.println("상태 없음");
+            query = em.createQuery("select o from Order o join o.member m" +
+                            " where m.name like : name", Order.class)
+                    .setParameter("name", orderSearch.getMemberName());
+
+        } else {
+            System.out.println("둘다 있음");
+            query = em.createQuery("select o from Order o join o.member m" +
+                            " where o.status = :status" +
+                            " and m.name like : name", Order.class)
+                    .setParameter("status", orderSearch.getOrderStatus())
+                    .setParameter("name", orderSearch.getMemberName());
+                  }
+
+        return query.setMaxResults(1000).getResultList();
     }
 
     public List<Order> findAllByString(OrderSearch orderSearch) {

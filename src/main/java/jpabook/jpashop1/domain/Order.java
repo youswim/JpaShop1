@@ -80,4 +80,16 @@ public class Order {
         }
         return totalPrice;
     }
+
+    @Override
+    public String toString() {
+        return "Order{" +
+                "id=" + id +
+                ", member=" + member +
+                ", orderItems=" + orderItems +
+                ", delivery=" + delivery +
+                ", orderDate=" + orderDate +
+                ", status=" + status +
+                '}';
+    }
 }
